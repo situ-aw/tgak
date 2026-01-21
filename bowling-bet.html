@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="チーム戦ボーリングの賭けポイント計算アプリ。スマホで簡単にスコア管理！">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- PWA対応 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- SNS共有用のメタタグ -->
+    <meta property="og:title" content="賭けボーリング">
+    <meta property="og:description" content="チーム戦ボーリングの賭けポイント計算アプリ">
+    <meta property="og:image" content="icon-512.png">
+    <meta property="og:type" content="website">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="賭けボーリング">
+    <meta name="twitter:description" content="チーム戦ボーリングの賭けポイント計算アプリ">
+    <meta name="twitter:image" content="icon-512.png">
+    
+    <title>賭けボーリング</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .setup-section {
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .team-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .team-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .player-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .player-item input {
+            flex: 1;
+        }
+        
+        .player-item input[type="number"] {
+            width: 100px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .team-result {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .team-result h3 {
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+        
+        .score-display {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .winner-section {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .winner-section h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .point-diff {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .add-player-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎳 賭けボーリング</h1>
+        
+        <!-- 設定画面 -->
+        <div id="setupScreen">
+            <div class="setup-section">
+                <div class="input-group">
+                    <label>1ピンあたりのポイント</label>
+                    <input type="number" id="pointPerPin" value="100" min="1">
+                </div>
+            </div>
+            
+            <!-- チームA -->
+            <div class="team-section">
+                <div class="team-header">
+                    <div class="team-name">チームA</div>
+                </div>
+                <div id="teamAPlayers">
+                    <div class="player-item">
+                        <input type="text" value="プレイヤー1" class="player-name">
+                        <button class="btn-danger remove-player">削除</button>
+                    </div>
+                </div>
+                <button class="btn-secondary add-player-btn" onclick="addPlayer('A')">+ プレイヤー追加</button>
+            </div>
+            
+            <!-- チームB -->
+            <div class="team-section">
+                <div class="team-header">
+                    <div class="team-name">チームB</div>
+                </div>
+                <div id="teamBPlayers">
+                    <div class="player-item">
+                        <input type="text" value="プレイヤー2" class="player-name">
+                        <button class="btn-danger remove-player">削除</button>
+                    </div>
+                </div>
+                <button class="btn-secondary add-player-btn" onclick="addPlayer('B')">+ プレイヤー追加</button>
+            </div>
+            
+            <button class="btn-primary" onclick="startGame()">ゲーム開始</button>
+        </div>
+        
+        <!-- スコア入力画面 -->
+        <div id="gameScreen" class="hidden">
+            <div class="input-group">
+                <label>1ピンあたり: <span id="displayPointPerPin">100</span>ポイント</label>
+            </div>
+            
+            <!-- チームA スコア入力 -->
+            <div class="team-section">
+                <div class="team-header">
+                    <div class="team-name">チームA</div>
+                </div>
+                <div id="teamAScores"></div>
+            </div>
+            
+            <!-- チームB スコア入力 -->
+            <div class="team-section">
+                <div class="team-header">
+                    <div class="team-name">チームB</div>
+                </div>
+                <div id="teamBScores"></div>
+            </div>
+            
+            <button class="btn-success" onclick="calculateResult()">結果を計算</button>
+            <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="resetGame()">最初に戻る</button>
+        </div>
+        
+        <!-- 結果画面 -->
+        <div id="resultSection" class="hidden result-section">
+            <div class="team-result">
+                <h3>チームA</h3>
+                <div>合計ピン数: <span id="teamATotalPins">0</span></div>
+                <div class="score-display"><span id="teamAPoints">0</span> pt</div>
+            </div>
+            
+            <div class="team-result">
+                <h3>チームB</h3>
+                <div>合計ピン数: <span id="teamBTotalPins">0</span></div>
+                <div class="score-display"><span id="teamBPoints">0</span> pt</div>
+            </div>
+            
+            <div class="winner-section">
+                <h2 id="winnerText">🏆 勝者</h2>
+                <div class="point-diff" id="pointDiff">0 pt 差</div>
+            </div>
+            
+            <button class="btn-primary" onclick="resetGame()">新しいゲーム</button>
+        </div>
+    </div>
+    
+    <script>
+        // Service Worker登録（PWA対応）
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+        
+        let playerCountA = 1;
+        let playerCountB = 1;
+        
+        // プレイヤー削除のイベントリスナーを設定
+        function setupRemoveButtons() {
+            document.querySelectorAll('.remove-player').forEach(btn => {
+                btn.onclick = function() {
+                    const teamSection = this.closest('.team-section');
+                    const players = teamSection.querySelectorAll('.player-item');
+                    if (players.length > 1) {
+                        this.closest('.player-item').remove();
+                    } else {
+                        alert('最低1人のプレイヤーが必要です');
+                    }
+                };
+            });
+        }
+        
+        setupRemoveButtons();
+        
+        function addPlayer(team) {
+            const container = document.getElementById(`team${team}Players`);
+            const playerCount = team === 'A' ? ++playerCountA : ++playerCountB;
+            
+            const playerItem = document.createElement('div');
+            playerItem.className = 'player-item';
+            playerItem.innerHTML = `
+                <input type="text" value="プレイヤー${playerCount}" class="player-name">
+                <button class="btn-danger remove-player">削除</button>
+            `;
+            
+            container.appendChild(playerItem);
+            setupRemoveButtons();
+        }
+        
+        function startGame() {
+            const pointPerPin = document.getElementById('pointPerPin').value;
+            document.getElementById('displayPointPerPin').textContent = pointPerPin;
+            
+            // チームAのプレイヤー情報を取得
+            const teamAPlayers = Array.from(document.querySelectorAll('#teamAPlayers .player-name'))
+                .map(input => input.value);
+            
+            // チームBのプレイヤー情報を取得
+            const teamBPlayers = Array.from(document.querySelectorAll('#teamBPlayers .player-name'))
+                .map(input => input.value);
+            
+            // スコア入力欄を生成
+            createScoreInputs('A', teamAPlayers);
+            createScoreInputs('B', teamBPlayers);
+            
+            // 画面切り替え
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+        }
+        
+        function createScoreInputs(team, players) {
+            const container = document.getElementById(`team${team}Scores`);
+            container.innerHTML = '';
+            
+            players.forEach((name, index) => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.innerHTML = `
+                    <input type="text" value="${name}" readonly style="background: #e9ecef;">
+                    <input type="number" class="score-input" data-team="${team}" min="0" max="300" value="0" placeholder="スコア">
+                `;
+                container.appendChild(playerItem);
+            });
+        }
+        
+        function calculateResult() {
+            const pointPerPin = parseInt(document.getElementById('pointPerPin').value);
+            
+            // チームAの合計
+            const teamAScores = Array.from(document.querySelectorAll('[data-team="A"]'))
+                .map(input => parseInt(input.value) || 0);
+            const teamATotalPins = teamAScores.reduce((sum, score) => sum + score, 0);
+            const teamAPoints = teamATotalPins * pointPerPin;
+            
+            // チームBの合計
+            const teamBScores = Array.from(document.querySelectorAll('[data-team="B"]'))
+                .map(input => parseInt(input.value) || 0);
+            const teamBTotalPins = teamBScores.reduce((sum, score) => sum + score, 0);
+            const teamBPoints = teamBTotalPins * pointPerPin;
+            
+            // 結果表示
+            document.getElementById('teamATotalPins').textContent = teamATotalPins;
+            document.getElementById('teamAPoints').textContent = teamAPoints.toLocaleString();
+            document.getElementById('teamBTotalPins').textContent = teamBTotalPins;
+            document.getElementById('teamBPoints').textContent = teamBPoints.toLocaleString();
+            
+            // 勝者判定
+            const diff = Math.abs(teamAPoints - teamBPoints);
+            let winnerText = '';
+            
+            if (teamAPoints > teamBPoints) {
+                winnerText = '🏆 チームA の勝利！';
+            } else if (teamBPoints > teamAPoints) {
+                winnerText = '🏆 チームB の勝利！';
+            } else {
+                winnerText = '🤝 引き分け！';
+            }
+            
+            document.getElementById('winnerText').textContent = winnerText;
+            document.getElementById('pointDiff').textContent = `${diff.toLocaleString()} pt 差`;
+            
+            // 結果画面表示
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+        
+        function resetGame() {
+            // 全画面を隠す
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
